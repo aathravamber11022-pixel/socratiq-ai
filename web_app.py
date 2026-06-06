@@ -9,19 +9,27 @@ st.set_page_config(
 )
 
 # 2. Custom CSS styling for smooth rounded edges and premium look
-st.markdown("""
+import streamlit as st
+from groq import Groq
+
+# 1. Page Configuration
+st.set_page_config(
+    page_title="Socratiq AI",
+    page_icon="🤖",
+    layout="wide"
+)
+
+# 2. Custom CSS styling for smooth rounded edges
+st.html("""
     <style>
-    /* Smooth rounded edges for chat bubbles */
     .stChatMessage {
         border-radius: 15px !important;
         padding: 15px !important;
         margin-bottom: 10px !important;
     }
-    /* Smooth rounded corners for the text input box */
     div[data-baseweb="textarea"], div[data-baseweb="input"] {
         border-radius: 20px !important;
     }
-    /* Styling for the upgrade button in sidebar */
     .upgrade-btn {
         background-color: #FF4B4B;
         color: white;
@@ -29,12 +37,11 @@ st.markdown("""
         border-radius: 12px;
         text-align: center;
         font-weight: bold;
-        cursor: pointer;
         margin-top: 10px;
         margin-bottom: 10px;
     }
     </style>
-    """, unsafe_html=True)
+""")
 
 # 3. Initialize Groq Client securely using the secret key nickname
 if "GROQ_API_KEY" in st.secrets:
