@@ -91,7 +91,7 @@ if prompt := st.chat_input("Ask Socratiq AI anything..."):
             
             # Request completion from Groq
             completion = client.chat.completions.create(
-                model="llama3-8b-8192", 
+                model="llama-3.1-8b-instant", 
                 messages=[
                     {"role": m["role"], "content": m["content"]}
                     for m in st.session_state.messages
