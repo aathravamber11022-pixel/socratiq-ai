@@ -61,7 +61,7 @@ st.markdown('<div class="premium-subtitle">Next-generation cloud-powered intelli
 
 # 3. Enter your free API Key here
 # TODO: Replace the text below with your actual gsk_ key from console.groq.com
-GROQ_API_KEY = st.secrets["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"]
+GROQ_API_KEY = st.secrets["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"]
 
 @st.cache_resource
 def load_ai():
