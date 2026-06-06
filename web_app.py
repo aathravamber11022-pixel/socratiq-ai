@@ -1,122 +1,122 @@
 import streamlit as st
-from duckduckgo_search import DDGS  # Direct, foolproof open-source import
-from langchain_groq import ChatGroq
+from groq import Groq
 
-# 1. Premium App Settings
+# 1. Page Configuration (Sets the browser tab title and top-left icon)
 st.set_page_config(
-    page_title="Socratiq AI", 
-    page_icon="⚡", 
-    layout="centered",
-    initial_sidebar_state="collapsed"
+    page_title="Socratiq AI",
+    page_icon="🤖",
+    layout="wide"
 )
 
-# 2. Premium Custom CSS (Dark Theme, Glassmorphism)
+# 2. Custom CSS styling for smooth rounded edges and premium look
 st.markdown("""
     <style>
-    .stApp {
-        background: linear-gradient(135deg, #0f111a 0%, #151926 100%);
-        color: #f1f5f9;
-        font-family: 'Inter', -apple-system, sans-serif;
+    /* Smooth rounded edges for chat bubbles */
+    .stChatMessage {
+        border-radius: 15px !important;
+        padding: 15px !important;
+        margin-bottom: 10px !important;
     }
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    .premium-title {
-        font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(45deg, #4f46e5, #06b6d4);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    /* Smooth rounded corners for the text input box */
+    div[data-baseweb="textarea"], div[data-baseweb="input"] {
+        border-radius: 20px !important;
+    }
+    /* Styling for the upgrade button in sidebar */
+    .upgrade-btn {
+        background-color: #FF4B4B;
+        color: white;
+        padding: 12px;
+        border-radius: 12px;
         text-align: center;
-        margin-bottom: 5px;
-        letter-spacing: -1px;
-    }
-    .premium-subtitle {
-        font-size: 1.1rem;
-        color: #94a3b8;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .stChatMessage[data-testid="stChatMessageUser"] {
-        background: rgba(79, 70, 229, 0.1) !important;
-        border: 1px solid rgba(79, 70, 229, 0.25) !important;
-        border-radius: 16px !important;
-    }
-    .stChatMessage[data-testid="stChatMessageAssistant"] {
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 16px !important;
-    }
-    .stChatInput textarea {
-        background-color: #1e2235 !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        color: #ffffff !important;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        margin-bottom: 10px;
     }
     </style>
-""", unsafe_allow_html=True)
+    """, unsafe_html=True)
 
-st.markdown('<div class="premium-title">Socratiq AI</div>', unsafe_allow_html=True)
-st.markdown('<div class="premium-subtitle">Next-generation cloud-powered intelligence engine.</div>', unsafe_allow_html=True)
-
-# 3. Enter your free API Key here
-# TODO: Replace the text below with your actual gsk_ key from console.groq.com
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-
-@st.cache_resource
-def load_ai():
-    # Connects to Groq's high-speed, currently supported Llama 3.1 model
-    return ChatGroq(model="llama-3.1-8b-instant", groq_api_key=GROQ_API_KEY)
-
-# 4. App Core Execution Loop
-if GROQ_API_KEY == "PASTE_YOUR_GSK_KEY_HERE":
-    st.info("⚠️ Please paste your free Groq API key into line 55 of the code to activate the engine!")
+# 3. Initialize Groq Client securely using the secret key nickname
+if "GROQ_API_KEY" in st.secrets:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 else:
-    try:
-        llm = load_ai()
+    st.error("Groq API Key not found in Streamlit Secrets. Please check your dashboard configuration.")
+    st.stop()
+
+# Initialize chat history in session state if it doesn't exist
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# 4. Building the Premium Left Sidebar
+with st.sidebar:
+    st.title("🤖 Socratiq AI")
+    
+    # New Chat Button (Resets the chat history seamlessly)
+    if st.button("➕ New Chat", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
         
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
+    st.write("---")
+    
+    # Library / Previous Chats Section
+    st.subheader("📚 Library")
+    st.caption("🕒 Recent History")
+    # You can add static titles here for show, or let it update dynamically later
+    st.markdown("• *Welcome to Socratiq AI*")
+    st.markdown("• *AI Assistant Dashboard*")
+    
+    st.write("---")
+    
+    # Premium Upgrade Block
+    st.markdown('<div class="upgrade-btn">🚀 Upgrade to Premium</div>', unsafe_html=True)
+    
+    st.write("---")
+    
+    # Account / Email Login layout placeholder
+    st.caption("👤 Account Profile")
+    email_input = st.text_input("Login Email", placeholder="user@example.com")
+    if email_input:
+        st.success(block=False, icon="✅", body="Logged in!")
 
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+# 5. Main Chat Window Layout
+st.title("Chat with Socratiq AI")
+st.caption("Powered by Groq Cloud Engine | High-Speed AI Inference")
 
-        if user_question := st.chat_input("Query anything across the web..."):
-            with st.chat_message("user"):
-                st.markdown(user_question)
-            st.session_state.messages.append({"role": "user", "content": user_question})
+# Display previous messages from session state with smooth container styling
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-            with st.spinner("⚡ Fetching live web telemetry..."):
-                try:
-                    # Direct query to DuckDuckGo search library
-                    with DDGS() as ddgs:
-                        search_results = [r for r in ddgs.text(user_question, max_results=3)]
-                    web_results = " ".join([res['body'] for res in search_results])
-                except Exception:
-                    web_results = "No live web telemetry retrieved."
-                
-                # Directives to infuse the authentic, scannable, adaptive personality
-                prompt = f"""You are Socratiq AI, an authentic, adaptive AI collaborator with a touch of wit. 
-                Your goal is to address the user's true intent with insightful, clear, and concise responses. 
-                Balance empathy with candor: be supportive and grounded, but direct. Style your tone, energy, and humor to match the user.
+# Accept user chat input
+if prompt := st.chat_input("Ask Socratiq AI anything..."):
+    # Display user message in chat message container
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Add user message to session chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-                STRICT RESPONSE RULES:
-                1. NEVER use robotic filler or intros (e.g., "Based on the search results...", "As an AI..."). Dive directly into the answer.
-                2. Use the Formatting Toolkit: Create a clear, scannable, organized response using Markdown. Use Headings (##, ###), Horizontal Rules (---), Judicious Bolding, and Bullet Points to avoid dense walls of text. 
-                3. Prioritize clarity at a glance. Keep it concise, engaging, and genuinely helpful—like a brilliant peer, not a rigid lecturer.
-
-                Live Internet Telemetry:
-                {web_results}
-                
-                User Question: {user_question}
-                """
-                
-                response = llm.invoke(prompt)
-
-            with st.chat_message("assistant"):
-                st.markdown(response.content)
-            st.session_state.messages.append({"role": "assistant", "content": response.content})
-
+    # Generate response from Groq using llama3-8b model (or replace with your specific model name)
+    try:
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+            
+            # Request streaming completion from Groq
+            completion = client.chat.completions.create(
+                model="llama3-8b-8192", 
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.messages
+                ],
+                stream=False # Change to True later if you want typewriter streaming
+            )
+            
+            full_response = completion.choices[0].message.content
+            message_placeholder.markdown(full_response)
+            
+        # Add assistant response to session chat history
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        
     except Exception as e:
-        st.error(f"Engine connection error: {e}")
+        st.error(f"An error occurred while connecting to Groq: {e}")
