@@ -8,37 +8,18 @@ st.set_page_config(
     layout="wide"
 )
 
-# 2. Custom CSS styling for smooth rounded edges and premium look
-import streamlit as st
-from groq import Groq
-
-# 1. Page Configuration
-st.set_page_config(
-    page_title="Socratiq AI",
-    page_icon="🤖",
-    layout="wide"
-)
-
-# 2. Custom CSS styling for smooth rounded edges
+# 2. Native CSS styling using st.html (Completely safe from TypeErrors)
 st.html("""
     <style>
+    /* Smooth rounded edges for chat bubbles */
     .stChatMessage {
         border-radius: 15px !important;
         padding: 15px !important;
         margin-bottom: 10px !important;
     }
+    /* Smooth rounded corners for text inputs */
     div[data-baseweb="textarea"], div[data-baseweb="input"] {
         border-radius: 20px !important;
-    }
-    .upgrade-btn {
-        background-color: #FF4B4B;
-        color: white;
-        padding: 12px;
-        border-radius: 12px;
-        text-align: center;
-        font-weight: bold;
-        margin-top: 10px;
-        margin-bottom: 10px;
     }
     </style>
 """)
@@ -58,7 +39,7 @@ if "messages" not in st.session_state:
 with st.sidebar:
     st.title("🤖 Socratiq AI")
     
-    # New Chat Button (Resets the chat history seamlessly)
+    # New Chat Button
     if st.button("➕ New Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
@@ -68,14 +49,14 @@ with st.sidebar:
     # Library / Previous Chats Section
     st.subheader("📚 Library")
     st.caption("🕒 Recent History")
-    # You can add static titles here for show, or let it update dynamically later
     st.markdown("• *Welcome to Socratiq AI*")
     st.markdown("• *AI Assistant Dashboard*")
     
     st.write("---")
     
-    # Premium Upgrade Block
-    st.markdown('<div class="upgrade-btn">🚀 Upgrade to Premium</div>', unsafe_html=True)
+    # Premium Upgrade Button (Using a beautiful native button instead of crashing HTML!)
+    if st.button("🚀 Upgrade to Premium", use_container_width=True, type="primary"):
+        st.toast("Premium features coming soon!")
     
     st.write("---")
     
@@ -83,7 +64,7 @@ with st.sidebar:
     st.caption("👤 Account Profile")
     email_input = st.text_input("Login Email", placeholder="user@example.com")
     if email_input:
-        st.success(block=False, icon="✅", body="Logged in!")
+        st.success("Logged in!", icon="✅")
 
 # 5. Main Chat Window Layout
 st.title("Chat with Socratiq AI")
@@ -103,20 +84,19 @@ if prompt := st.chat_input("Ask Socratiq AI anything..."):
     # Add user message to session chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Generate response from Groq using llama3-8b model (or replace with your specific model name)
+    # Generate response from Groq using llama3-8b model
     try:
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
-            full_response = ""
             
-            # Request streaming completion from Groq
+            # Request completion from Groq
             completion = client.chat.completions.create(
                 model="llama3-8b-8192", 
                 messages=[
                     {"role": m["role"], "content": m["content"]}
                     for m in st.session_state.messages
                 ],
-                stream=False # Change to True later if you want typewriter streaming
+                stream=False
             )
             
             full_response = completion.choices[0].message.content
