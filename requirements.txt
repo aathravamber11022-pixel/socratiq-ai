@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 streamlit
 duckduckgo-search
+=======
+streamlit
+duckduckgo-search
+>>>>>>> af50e02aaba55a2a542b6dc74acb8b7311af2012
 langchain-groq
